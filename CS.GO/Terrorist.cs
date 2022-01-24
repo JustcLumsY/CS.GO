@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Threading;
 using System.Threading.Tasks;
+using CS.GO;
+using System.Timers;
+
 
 namespace CS.GO
 {
@@ -13,6 +15,7 @@ namespace CS.GO
         public int Health;
         public int Id;
         public string Rank;
+        public static Timer BombTimer;
         
 
         public Terrorist(int id, string name, int health, bool isDead, string rank)
@@ -22,39 +25,100 @@ namespace CS.GO
             Health = health;
             IsDead = isDead;
             Rank = rank;
+            
         }
 
 
-        public static async Task<bool> FindBombSite()
+        public  bool FindBombSite()
         {
             
-            var success =  Program.IsSuccessful(3);
+            var success =  Program.IsSuccessful(10);
             if (success == false)
             {
-               var colorHeadShot = Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("");
                 Console.WriteLine("<Terrorist>"  + " " + "<<Failed To Find Bomb Site>>");
-                await Task.Delay(2000);
-
-                Console.WriteLine(@"   
-                               ______                        ____                 
-                              / ________ _____ ___  ___     / __ \_   _____  _____
-                             / / __/ __ `/ __ `__ \/ _ \   / / / | | / / _ \/ ___/
-                            / /_/ / /_/ / / / / / /  __/  / /_/ /| |/ /  __/ /    
-                            \____/\__,_/_/ /_/ /_/\___/   \____/ |___/\___/_/     
-                                                                                  
-                                ");
-                Console.ReadLine();
+                 Task.Delay(2000);
 
 
-
-                
+                //var t = new Game();
+                KillRandomCt();
             }
             else
             {
-                await PlantBomb();
+                PlantBomb();
             }
             
             return success;
+
+        }
+
+        public static async Task KillRandomCt()
+        {
+
+            if (Program.IsSuccessful(3))
+            {
+
+                Random rnd = new Random();
+                var randomTerrorIndex = rnd.Next(0, Game.Terrorists.Count - 1);
+                var randomTerrorist = Game.Terrorists[randomTerrorIndex];
+                var randomIndex = rnd.Next(0, Game.CounterTerrorists.Count - 1);
+                var randomCounterTerrorist = Game.CounterTerrorists[randomIndex];
+                Game.Terrorists[4].KillCounterTerrorist(randomCounterTerrorist);
+
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("<Terrorist>" + " " + randomTerrorist.Name + " " + "Shoots at <Counter-Terrorist>");
+                Console.WriteLine("");
+                await Task.Delay(400);
+                Console.Write("-");
+                await Task.Delay(400);
+                Console.Write("-");
+                await Task.Delay(400);
+                Console.Write("-");
+                await Task.Delay(440);
+                Console.Write(">");
+                await Task.Delay(400);
+
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.Write($"<Headshot>");
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.Write("<");
+                await Task.Delay(400);
+                Console.Write("-");
+                await Task.Delay(400);
+                Console.Write("-");
+                await Task.Delay(400);
+                Console.Write("-");
+                Console.Write(" ");
+                Console.ForegroundColor = ConsoleColor.Blue;
+                Console.Write("<Counter-Terrorist>" + " " + randomCounterTerrorist.Name + " ");
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.Write("<Died>");
+                Console.WriteLine(" ");
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                await Task.Delay(1000);
+                Console.ForegroundColor = ConsoleColor.Blue;
+                Console.WriteLine("");
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                await Task.Delay(2500);
+                Console.WriteLine("");
+                Game.Terrorists[0].TerroristLookingForBombSite();
+
+            }
+            else
+            {
+                Random rnd = new Random();
+                var randomTerrorIndex = rnd.Next(0, Game.Terrorists.Count - 1);
+                var randomTerrorist = Game.Terrorists[randomTerrorIndex];
+                //await Task.Delay(0);
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("<Terrorist>" + " " + randomTerrorist.Name + " " + "<Missed>");
+                Console.WriteLine("");
+                await Task.Delay(2500);
+                Game.PickRandom();
+                await Task.Delay(3500);
+                Game.Terrorists[0].TerroristLookingForBombSite();
+            }
 
         }
 
@@ -68,23 +132,26 @@ namespace CS.GO
             {
                 ct.IsDead = true;
             }
-            else
-            {
-                //System.Console.WriteLine("<Terrorist> missed");
-            }
+          
         }
 
+        public async Task TerroristLookingForBombSite()
+        {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("<Terrorist> Looking For The Bomb Site");
+            await Task.Delay(2000);
+            FindBombSite();
+        }
 
-        public static async Task PlantBomb()
+        public async Task PlantBomb()
         {
           
             if (true)
             {
-                var colorHeadShot = Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("<Terrorist>" + " " + "<Bomb Site A Found>");
                 Console.WriteLine("");
                 await Task.Delay(3000);
-
                 Console.WriteLine("<Terrorist>" + " " + "<Locating Bomb Spot>");
                 Console.WriteLine("");
                 await Task.Delay(2500);
@@ -96,59 +163,70 @@ namespace CS.GO
 
                 for (var i = 5; i > 0; i--)
                 {
-                    colorHeadShot = Console.ForegroundColor = ConsoleColor.Cyan;
-                    await Beep(2);
- 
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Beep(2);
                     await Task.Delay(1000);
                     Console.WriteLine(i + " " +"<Secounds Remaining>");
                     Console.WriteLine("");
                 }
 
-                colorHeadShot = Console.ForegroundColor = ConsoleColor.Red;
+                Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("<Terrorist>" + " " + "<<Bomb Has Been Planted!>>");
                 Console.WriteLine("");
-                colorHeadShot = Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.ForegroundColor = ConsoleColor.Cyan;
 
-                for (var i = 15; i > 0; i--)
-                {
-                    
-                    await Task.Delay(1000);
-                    
-                    Console.WriteLine($"{i}" + " " + "<Secounds Left>" );
-                    if (i <= 6)
-                    {
-                        colorHeadShot = Console.ForegroundColor = ConsoleColor.Red;
-                        await Beep(5);
-                    
-                    }
-                    await Beep(1);
-                    if (i != 1) continue;
-                    await Task.Delay(1000);
-                    colorHeadShot = Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("<<<<Bomb Goes BOOOOOOOOOOOOOOM!>>>>");
-                    Console.WriteLine("");
-                    await Task.Delay(1000);
-                    colorHeadShot = Console.ForegroundColor = ConsoleColor.Cyan;
-                    Console.WriteLine("<Terrorist Wins!>");
 
-                    Console.ReadLine();
+                BombTimer = new System.Timers.Timer();
 
-               
-                }
-                
+
+
+
+
+
+
+
+                //for (var i = 15; i > 0; i--)
+                //{
+
+                //    await Task.Delay(1000);
+
+                //    Console.WriteLine($"{i}" + " " + "<Secounds Left>" );
+                //    if (i <= 6)
+                //    {
+                //       Console.ForegroundColor = ConsoleColor.Red;
+                //         Beep(5);
+
+                //    }
+                //    Beep(1);
+                //    if (i != 1) continue;
+                //    await Task.Delay(1000);
+                //    Console.ForegroundColor = ConsoleColor.Red;
+                //    Console.WriteLine("<<<<Bomb Goes BOOOOOOOOOOOOOOM!>>>>");
+                //    Console.WriteLine("");
+                //    await Task.Delay(1000);
+                //    Console.ForegroundColor = ConsoleColor.Cyan;
+                //    Console.WriteLine("<Terrorist Wins!>");
+                //    Console.ReadLine();
+
+
+                //}
+
+
+
             }
         }
 
-        private static async Task Beep(int amount = 0)
+        public void Beep(int amount = 0)
         {
             if (amount > 0)
             {
-                for (int i = 0; i < amount; i++)
+                for (var i = 0; i < amount; i++)
                 {
                      Console.Beep();
                 }
             }
             else  Console.Beep();
         }
+    
     }
 }
